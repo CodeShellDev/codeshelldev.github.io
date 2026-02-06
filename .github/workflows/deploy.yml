@@ -36,8 +36,10 @@ jobs:
 
       - name: Generate sitemap
         run: |
+          REPOSITORY_OWNER=$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')
+
           SITE_PATH="${GITHUB_REPOSITORY#*/}"
-          SITE_DOMAIN="${GITHUB_REPOSITORY_OWNER}.github.io"
+          SITE_DOMAIN="${REPOSITORY_OWNER}.github.io"
 
           if [[ "${SITE_PATH}" -eq "${SITE_DOMAIN}" ]]; then
             SITE_PATH=""
