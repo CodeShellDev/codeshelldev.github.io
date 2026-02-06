@@ -50,7 +50,7 @@ jobs:
             echo "Processing $repo at $pages_url..."
 
             sitemap_file="sitemaps/${repo}_sitemap.xml"
-            if sitemap-generator "$pages_url" -f "$sitemap_file" -d 0; then
+            if sitemap-generator "$pages_url" -f "$sitemap_file"; then
               echo "Sitemap generated for $repo"
             else
               echo "Failed to crawl $repo, skipping."
