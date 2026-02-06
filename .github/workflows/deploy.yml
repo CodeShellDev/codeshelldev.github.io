@@ -41,7 +41,7 @@ jobs:
           SITE_PATH="${GITHUB_REPOSITORY#*/}"
           SITE_DOMAIN="${REPOSITORY_OWNER}.github.io"
 
-          if [[ "${SITE_PATH}" -eq "${SITE_DOMAIN}" ]]; then
+          if [[ "${SITE_PATH}" = "${SITE_DOMAIN}" ]]; then
             SITE_PATH=""
           fi
 
