@@ -34,7 +34,7 @@ jobs:
       - name: Install sitemap generator
         run: npm install -g sitemap-generator-cli
 
-      - name: Crawl GH Pages and Generate Combined Sitemap
+      - name: Generate sitemap
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OWNER: ${{ github.repository_owner }}
@@ -42,26 +42,15 @@ jobs:
         run: |
           mkdir -p sitemaps
 
-          repos=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-                       "https://api.github.com/users/$OWNER/repos?per_page=100" \
-                  | jq -r '.[].name')
+          repos=$(curl -s "https://api.github.com/users/$OWNER/repos?per_page=100" \
+                  | jq -r '.[] | select(.has_pages == true) | .name')
 
           for repo in $repos; do
-            echo "Processing $repo..."
+            pages_url="https://$OWNER.github.io/$repo"
+            echo "Processing $repo at $pages_url..."
 
-            # Check if GH Pages is enabled
-            pages_url=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-                             "https://api.github.com/repos/$OWNER/$repo/pages" \
-                          | jq -r '.html_url // empty')
-
-            if [ -z "$pages_url" ]; then
-              echo "No GH Pages for $repo, skipping."
-              continue
-            fi
-
-            # Crawl site and generate sitemap (skip on failure)
             sitemap_file="sitemaps/${repo}_sitemap.xml"
-            if sitemap-generator "$pages_url" -f "$sitemap_file"; then
+            if sitemap-generator "$pages_url" -f "$sitemap_file" -d 0; then
               echo "Sitemap generated for $repo"
             else
               echo "Failed to crawl $repo, skipping."
@@ -77,6 +66,8 @@ jobs:
             done
           done
           echo '</urlset>' >> $SITEMAP_PATH
+
+          cat $SITEMAP_PATH
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
