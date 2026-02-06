@@ -69,6 +69,8 @@ jobs:
 
           echo '</urlset>' >> $SITEMAP_FILE
 
+          cat $SITEMAP_FILE
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
