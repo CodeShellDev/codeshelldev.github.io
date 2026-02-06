@@ -47,31 +47,25 @@ jobs:
           # Get all repos with Github Pages
           curl -s -H "Authorization: token $GITHUB_TOKEN" \
               "https://api.github.com/users/$REPO_OWNER/repos?per_page=100" \
-                  | jq -r '.[] | select(.has_pages==true) | .name' \
-                  | while read REPO; do
-                      URL="https://${REPO_OWNER}.github.io/${REPO}/"
-                      echo "Crawling $URL"
+              | jq -r '.[] | select(.has_pages==true) | .name' \
+              | while read REPO; do
+                  URL="https://${REPO_OWNER}.github.io/${REPO}/"
+                  echo "Crawling $URL"
 
-                      TEMP_SITEMAP="./temp/${REPO}_sitemap.xml"
+                  TEMP_SITEMAP="./temp/${REPO}_sitemap.xml"
 
-                      # Generate sitemap, continue if it fails
-                      sitemap-generator "$URL" --output "$TEMP_SITEMAP" --maxDepth 0 --ignore querystring || echo "Crawl failed for $URL, skipping"
+                  # Generate sitemap, continue if it fails
+                  sitemap-generator "$URL" --output "$TEMP_SITEMAP" --maxDepth 0 --ignore querystring || echo "Crawl failed for $URL, skipping"
 
-                      # Merge if file exists
-                      if [ -f "$TEMP_SITEMAP" ]; then
-                          # Extract <url> entries without XML header and urlset tags
-                          sed '1d;$d' "$TEMP_SITEMAP" \
-                          | while read line; do
-                              # Extract the URL inside <loc>...</loc>
-                              LOC=$(echo "$line" | sed -n 's|.*<loc>\(.*\)</loc>.*|\1|p')
-                              # Ignore URLs where path equals the domain (e.g., user.github.io/user.github.io)
-                              DOMAIN="https://${REPO_OWNER}.github.io"
-                              if [[ "$LOC" != "$DOMAIN/$DOMAIN"* ]]; then
-                                  echo "$line" >> $SITEMAP_FILE
-                              fi
-                          done
-                      fi
-                  done
+                  # Only merge if the sitemap has actual <url> entries
+                  if [ -f "$TEMP_SITEMAP" ] && grep -q '<url>' "$TEMP_SITEMAP"; then
+                      # Remove XML header and urlset tags and append
+                      sed '1d;$d' "$TEMP_SITEMAP" >> $SITEMAP_FILE
+                      echo "Merged sitemap from $REPO"
+                  else
+                      echo "No URLs found for $REPO. Skipping..."
+                  fi
+                done
 
           echo '</urlset>' >> $SITEMAP_FILE
 
