@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   id="Layer_1"
+   data-name="Layer 1"
+   viewBox="0 0 756.26 596.9"
+   version="1.1"
+   sodipodi:docname="docker.svg"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview329"
+     pagecolor="#505050"
+     bordercolor="#ffffff"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="1"
+     inkscape:deskcolor="#505050"
+     showgrid="false"
+     inkscape:zoom="0.39537609"
+     inkscape:cx="-61.966316"
+     inkscape:cy="299.71463"
+     inkscape:window-width="2560"
+     inkscape:window-height="1508"
+     inkscape:window-x="0"
+     inkscape:window-y="1080"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="Layer_1" />
+  <defs
+     id="defs324">
+    <style
+       id="style322">
+      .cls-1 {
+        fill: #1d63ed;
+        stroke-width: 0px;
+      }
+    </style>
+  </defs>
+  <path
+     class="cls-1"
+     d="m 670.13259,261.22213 c -12.97376,-8.73314 -47.0666,-12.46292 -71.8525,-5.7871 -1.33656,-24.68793 -14.06539,-45.49212 -37.35378,-63.64418 l -8.62118,-5.78711 -5.74512,8.67716 c -11.2943,17.14439 -16.05275,39.98492 -14.3663,60.74713 1.32957,12.79181 5.78011,27.17211 14.3663,37.6057 -32.25944,18.71187 -61.99272,14.46426 -193.67564,14.46426 H 149.57288 c -0.5948,29.73328 4.18463,86.93257 40.55873,133.49533 4.01669,5.14332 8.42525,10.11869 13.20468,14.91212 29.57233,29.61432 74.25271,51.32821 141.06686,51.39119 101.92865,0.091 189.26008,-55.002 242.37971,-188.21742 17.48028,0.2869 63.62318,3.13497 86.20479,-40.50275 0.55282,-0.73476 5.74512,-11.57422 5.74512,-11.57422 l -8.60718,-5.78711 z m -387.87611,-27.1931 h -57.1713 v 57.1713 h 57.1713 z m 73.86083,0 h -57.17129 v 57.1713 h 57.17129 z m 73.86084,0 h -57.1713 v 57.1713 h 57.1713 z m 73.86084,0 h -57.1713 v 57.1713 h 57.1713 z m -295.44335,0 h -57.1713 v 57.1713 h 57.1713 z m 73.86084,-72.20938 h -57.1713 v 57.1713 h 57.1713 z m 73.86083,0 h -57.17129 v 57.1713 h 57.17129 z m 73.86084,0 h -57.1713 v 57.1713 h 57.1713 z m 0,-72.216372 h -57.1713 v 57.171292 h 57.1713 z"
+     id="path326" />
+</svg>
