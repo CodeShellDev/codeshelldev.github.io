@@ -55,17 +55,14 @@ jobs:
                   TEMP_SITEMAP="./temp/${REPO}_sitemap.xml"
 
                   # Generate sitemap, continue if it fails
-                  sitemap-generator "$URL" --output "$TEMP_SITEMAP" --maxDepth 0 --ignore querystring || echo "Crawl failed for $URL, skipping"
+                  sitemap-generator "$URL" -f "$TEMP_SITEMAP" -d 0
 
-                  # Only merge if the sitemap has actual <url> entries
-                  if [ -f "$TEMP_SITEMAP" ] && grep -q '<url>' "$TEMP_SITEMAP"; then
-                      # Remove XML header and urlset tags and append
+                  if [ -f "$TEMP_SITEMAP" ] && grep -q '<loc>' "$TEMP_SITEMAP"; then
                       sed '1d;$d' "$TEMP_SITEMAP" >> $SITEMAP_FILE
                       echo "Merged sitemap from $REPO"
                   else
-                      echo "No URLs found for $REPO. Skipping..."
+                      echo "Skipped $REPO: no <loc> entries found"
                   fi
-                done
 
           echo '</urlset>' >> $SITEMAP_FILE
 
