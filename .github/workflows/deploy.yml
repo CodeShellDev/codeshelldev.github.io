@@ -36,7 +36,14 @@ jobs:
 
       - name: Generate sitemap
         run: |
-          SITE_URL="https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}"
+          SITE_PATH="&{GITHUB_REPOSITORY#*/}"
+          SITE_DOMAIN="{GITHUB_REPOSITORY_OWNER}.github.io"
+
+          if [[ "$SITE_PATH" -eq "$SITE_DOMAIN" ]]; then
+            SITE_PATH=""
+          fi
+
+          SITE_URL="https://$SITE_DOMAIN/$SITE_PATH"
 
           echo "Crawling site: $SITE_URL"
 
