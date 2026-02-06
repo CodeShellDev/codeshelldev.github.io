@@ -47,7 +47,7 @@ jobs:
 
           for repo in $repos; do
             pages_url="https://$OWNER.github.io/$repo"
-            echo "Processing $repo at $pages_url..."
+            echo "Processing $repo at $pages_url ..."
 
             sitemap_file="sitemaps/${repo}_sitemap.xml"
             if sitemap-generator "$pages_url" -f "$sitemap_file"; then
@@ -58,14 +58,15 @@ jobs:
           done
 
           # Combine all sitemaps
-          echo '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' > $SITEMAP_PATH
+          echo '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' > "$SITEMAP_PATH"
+
           for f in sitemaps/*.xml; do
             [ ! -s "$f" ] && continue
-            grep -oP '(?<=<url>).*?(?=</url>)' "$f" | while read -r url_content; do
-              echo "<url>$url_content</url>" >> $SITEMAP_PATH
-            done
+            # Extract full <url> blocks and append
+            awk '/<url>/,/<\/url>/' "$f" >> "$SITEMAP_PATH"
           done
-          echo '</urlset>' >> $SITEMAP_PATH
+
+          echo '</urlset>' >> "$SITEMAP_PATH"
 
           cat $SITEMAP_PATH
 
