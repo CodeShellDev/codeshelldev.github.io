@@ -34,40 +34,49 @@ jobs:
       - name: Install sitemap generator
         run: npm install -g sitemap-generator-cli
 
-      - name: Generate sitemap from repos
+      - name: Crawl GH Pages and Generate Combined Sitemap
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+          SITEMAP_PATH: sitemap.xml
         run: |
-          REPO_OWNER=$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')
-          SITEMAP_FILE=./sitemap.xml
+          mkdir -p sitemaps
 
-          echo '<?xml version="1.0" encoding="UTF-8"?>' > $SITEMAP_FILE
-          echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' >> $SITEMAP_FILE
+          repos=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+                       "https://api.github.com/users/$OWNER/repos?per_page=100" \
+                  | jq -r '.[].name')
 
-          # Get all repos with Github Pages
-          curl -s -H "Authorization: token $GITHUB_TOKEN" \
-              "https://api.github.com/users/$REPO_OWNER/repos?per_page=100" \
-              | jq -r '.[] | select(.has_pages==true) | .name' \
-              | while read REPO; do
-                  URL="https://${REPO_OWNER}.github.io/${REPO}/"
-                  echo "Crawling $URL"
+          for repo in $repos; do
+            echo "Processing $repo..."
 
-                  TEMP_SITEMAP="./temp/${REPO}_sitemap.xml"
+            # Check if GH Pages is enabled
+            pages_url=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+                             "https://api.github.com/repos/$OWNER/$repo/pages" \
+                          | jq -r '.html_url // empty')
 
-                  # Generate sitemap, continue if it fails
-                  sitemap-generator "$URL" -f "$TEMP_SITEMAP" -d 0
+            if [ -z "$pages_url" ]; then
+              echo "No GH Pages for $repo, skipping."
+              continue
+            fi
 
-                  if [ -f "$TEMP_SITEMAP" ] && grep -q '<loc>' "$TEMP_SITEMAP"; then
-                      sed '1d;$d' "$TEMP_SITEMAP" >> $SITEMAP_FILE
-                      echo "Merged sitemap from $REPO"
-                  else
-                      echo "Skipped $REPO: no <loc> entries found"
-                  fi
-                done
+            # Crawl site and generate sitemap (skip on failure)
+            sitemap_file="sitemaps/${repo}_sitemap.xml"
+            if sitemap-generator "$pages_url" -f "$sitemap_file"; then
+              echo "Sitemap generated for $repo"
+            else
+              echo "Failed to crawl $repo, skipping."
+            fi
+          done
 
-          echo '</urlset>' >> $SITEMAP_FILE
-
-          cat $SITEMAP_FILE
+          # Combine all sitemaps
+          echo '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' > $SITEMAP_PATH
+          for f in sitemaps/*.xml; do
+            [ ! -s "$f" ] && continue
+            grep -oP '(?<=<url>).*?(?=</url>)' "$f" | while read -r url_content; do
+              echo "<url>$url_content</url>" >> $SITEMAP_PATH
+            done
+          done
+          echo '</urlset>' >> $SITEMAP_PATH
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
