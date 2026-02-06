@@ -34,25 +34,31 @@ jobs:
       - name: Install sitemap generator
         run: npm install -g sitemap-generator-cli
 
-      - name: Generate sitemap
+      - name: Generate sitemap from repos
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          REPOSITORY_OWNER=$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')
+          REPO_OWNER=$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')
+          SITEMAP_FILE=./sitemap.xml
 
-          SITE_PATH="${GITHUB_REPOSITORY#*/}"
-          SITE_DOMAIN="${REPOSITORY_OWNER}.github.io"
+          echo '<?xml version="1.0" encoding="UTF-8"?>' > $SITEMAP_FILE
+          echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' >> $SITEMAP_FILE
 
-          if [[ "${SITE_PATH}" = "${SITE_DOMAIN}" ]]; then
-            SITE_PATH=""
-          fi
+          # Get all repos with Github Pages
+          curl -s -H "Authorization: token $GITHUB_TOKEN" \
+               "https://api.github.com/users/$REPO_OWNER/repos?per_page=100" \
+               | jq -r '.[] | select(.has_pages==true) | .name' \
+               | while read REPO; do
+                   URL="https://${REPO_OWNER}.github.io/${REPO}/"
+                   echo "Crawling $URL"
+                   # Generate temporary sitemap for this repo
+                   TEMP_SITEMAP="./temp_sitemap.xml"
+                   sitemap-generator "$URL" --output "$TEMP_SITEMAP" --maxDepth 0 --ignore querystring
+                   # Merge the URLs into main sitemap (strip XML headers)
+                   sed '1d;$d' "$TEMP_SITEMAP" >> $SITEMAP_FILE
+                 done
 
-          SITE_URL="https://${SITE_DOMAIN}/${SITE_PATH}"
-
-          echo "Crawling site: $SITE_URL"
-
-          sitemap-generator "$SITE_URL" \
-            --output ./sitemap.xml \
-            --maxDepth 0 \
-            --ignore querystring
+          echo '</urlset>' >> $SITEMAP_FILE
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
